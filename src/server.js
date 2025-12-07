@@ -1,26 +1,38 @@
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+
 import episodesRouter from "./routes/episodes.js";
-import usersRouter from "./routes/users.js"; // <-- IMPORTANTE
+import usersRouter from "./routes/users.js";
+import feedRouter from "./routes/rss.js";
+
+
+dotenv.config(); // Carrega variáveis do .env
 
 const app = express();
 
-// JSON middleware
+// Middleware
 app.use(express.json());
+app.use(cors());
 
-// MongoDB Atlas
-const MONGO_URI = "mongodb+srv://cafenataverna:c4fen4t4vern4@cafenataverna.sxzygzb.mongodb.net/cafenataverna?appName=cafenataverna";
+// Conectar ao MongoDB
+const MONGO_URI = process.env.MONGODB_URI || "mongodb://mongodb:27017/fullstack-app";
 
-// Conexão com o banco
 mongoose
   .connect(MONGO_URI)
-  .then(() => console.log("🔥 MongoDB conectado"))
-  .catch((err) => console.error("Erro ao conectar MongoDB", err));
+  .then(() => console.log("🔥 MongoDB conectado com sucesso"))
+  .catch((err) => console.error("❌ Erro ao conectar no MongoDB:", err));
 
 // Rotas
 app.use("/episodes", episodesRouter);
-app.use("/users", usersRouter);  // <-- AQUI
+app.use("/users", usersRouter);
+app.use("/rss", feedRouter);
 
-// Porta
-const PORT = 3000;
-app.listen(PORT, () => console.log(`🚀 Server rodando na porta ${PORT}`));
+
+// Porta do servidor
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});
